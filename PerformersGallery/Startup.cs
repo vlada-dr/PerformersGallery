@@ -10,37 +10,54 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PerformersGallery.Hubs;
+using PerformersGallery.Services;
 
 namespace PerformersGallery
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
+            
             Configuration = configuration;
+            
         }
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSignalR();
+            services.AddSingleton(new SecretsService()
+            {
+                FacePlusPlusKey = Configuration["FacePlusPlus:Key"],
+                FacePlusPlusSecret = Configuration["FacePlusPlus:Secret"],
+                FlickrKey = Configuration["Flickr:Key"],
+                FlickrSecret = Configuration["Flickr:Secret"],
+            });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors(builder => builder.AllowAnyOrigin());
+            // access to secrets Configuration["Flickr:Key"] TODO: pass to service
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<GalleryHub>("/galleryHub");
+            });
             app.UseHttpsRedirection();
             app.UseMvc();
         }
