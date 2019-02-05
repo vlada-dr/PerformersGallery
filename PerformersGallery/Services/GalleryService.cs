@@ -47,7 +47,9 @@ namespace PerformersGallery.Services
             var photos = await GetPhotosFromCache();
             if(requestBody.Emotion != null && requestBody.Emotion.Length > 0)
             {
-                photos.FindAll(el => el.FacesFound.Any(face => string.Equals(face.Attributes.CastEmotion, requestBody.Emotion)));
+                photos = photos.FindAll(el => el.FacesFound.Any(face => 
+                face.Attributes != null && string.Equals(face.Attributes.CastEmotion, requestBody.Emotion
+                )));
             }
             int index = 0;
             if(requestBody.LastPhotoId != 0)
@@ -56,7 +58,14 @@ namespace PerformersGallery.Services
             }
             var returnBody = _mapper.Map<GalleryRoot>(requestBody);
             returnBody.Photos = photos.Skip(index).Take(requestBody.Count).ToList();
-            returnBody.LastPhotoId = returnBody.Photos.Last().Id;
+            if(returnBody.Photos.Count > 0)
+            {
+                returnBody.LastPhotoId = returnBody.Photos.Last().Id;
+            }
+            else
+            {
+                returnBody.LastPhotoId = 0;
+            }
             return returnBody;
         }
 
