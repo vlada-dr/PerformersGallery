@@ -7,7 +7,7 @@ namespace PerformersGallery.Models.Flickr
 {
     public class FlickrRoot
     {
-        public FlickrPhoto Photos { get; set; }
+        public FlickrPhotoContainer Photos { get; set; }
         public string Stat { get; set; }
     }
 }

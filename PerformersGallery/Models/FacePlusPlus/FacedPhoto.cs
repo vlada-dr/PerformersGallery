@@ -7,9 +7,7 @@ namespace PerformersGallery.Models.FacePlusPlus
 {
     public class FacedPhoto
     {
-        public Dictionary<string, Landmark> Landmark { get; set; }
         public Attributes Attributes { get; set; }
-        public FaceRectangle FaceRectangle { get; set; }
         public string FaceToken { get; set; }
     }
 
