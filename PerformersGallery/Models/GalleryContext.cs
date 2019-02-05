@@ -17,7 +17,6 @@ namespace PerformersGallery.Models
         }
 
         public DbSet<FlickrPhoto> FlickrPhotos { get; set; }
-        public DbSet<FacedPhoto> FacedPhotos { get; set; }
         public DbSet<GalleryPhoto> GalleryPhotos { get; set; }
     }
 }

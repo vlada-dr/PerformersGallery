@@ -13,7 +13,8 @@ namespace PerformersGallery.Helpers
     {
         public MapperProfile()
         {
-            CreateMap<FacedPhoto, GalleryPhoto>();
+            CreateMap<GalleryViewRoot, GalleryRoot>();
+            CreateMap<GalleryRoot, GalleryViewRoot>();
         }
     }
 }

@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace PerformersGallery.Models.FacePlusPlus
 {
-    public partial class Age
+    public class Age
     {
+        public int Id { get; set; }
         public long Value { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace PerformersGallery.Models.Gallery
     {
         public int Id { get; set; }
         public string PhotoUrl { get; set; }
-        public Attributes Attributes { get; set; }
+        public List<FaceFound> FacesFound { get; set; }
         public DateTime TimeCreated { get; set; }
     }
 }
