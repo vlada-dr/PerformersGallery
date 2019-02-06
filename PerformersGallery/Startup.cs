@@ -9,6 +9,7 @@ using PerformersGallery.Hubs;
 using PerformersGallery.Models;
 using PerformersGallery.Services;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
 using System.Net.Http;
 
 namespace PerformersGallery
@@ -20,7 +21,6 @@ namespace PerformersGallery
         {
             
             Configuration = configuration;
-            
         }
 
         public IConfiguration Configuration { get; }
@@ -34,17 +34,17 @@ namespace PerformersGallery
             services.AddSignalR();
             services.AddSingleton(new SecretsService()
             {
-                FacePlusPlusKey = "-ZNoJiAUABmEq7u6BfV8FrzuGlQ9by7o", //Configuration["FacePlusPlus-Key"],
-                FacePlusPlusSecret = "l4ExKKxgQkAZWExTevnz4ii53Yeqm9eK",
-                //Configuration["FacePlusPlus-Secret"],
-                FlickrKey = "6a652fcc8e692fc3c6422edd123eae5f",//Configuration["Flickr-Key"],
-                FlickrSecret = "4534f6ab4f02fe3b"
-                //Configuration["Flickr-Secret"],
+                FacePlusPlusKey = Configuration.GetSection("Profile:FacePlusPlusKey").Value,
+                FacePlusPlusSecret = Configuration.GetSection("Profile:FacePlusPlusSecret").Value,
+                FlickrKey = Configuration.GetSection("Profile:FlickrKey").Value,
+                FlickrSecret = Configuration.GetSection("Profile:FlickrSecret").Value
             });
             services.AddTransient<FlickrService>();
             services.AddTransient<FaceService>();
             services.AddTransient<GalleryService>();
             services.AddSingleton<HttpClient>();
+        
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info {
@@ -58,6 +58,8 @@ namespace PerformersGallery
                 });
             });
             services.AddMemoryCache();
+            var provider = services.BuildServiceProvider();
+            services.AddSingleton(new CheckUpdatesService(provider.GetService<FlickrService>()));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
