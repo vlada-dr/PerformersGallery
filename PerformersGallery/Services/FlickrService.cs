@@ -42,12 +42,35 @@ namespace PerformersGallery.Services
 
         private async Task<IActionResult> ByTag()
         {
-            var response = await _http.GetAsync(BuildByTagQuery());
-            var responseBody = JsonConvert.DeserializeObject<FlickrRoot>(await response.Content.ReadAsStringAsync());
-            var newPhotos = new List<string>();
-            foreach(var photo in responseBody.Photos.Photo)
+            var responseBody = new FlickrRoot();
+            do
             {
-                if(await _context.FlickrPhotos.FindAsync(photo.Id) == null)
+                var response = await _http.GetAsync(BuildByTagQuery(responseBody.Photos.Page));
+                responseBody = await HandleRequestAsync(responseBody, response);
+            } while (responseBody.Photos.Page < responseBody.Photos.Pages);
+            
+            return new OkResult();
+        }
+
+        private async Task<IActionResult> ByPhotoset()
+        {
+            var responseBody = new FlickrRoot();
+            do
+            {
+                var response = await _http.GetAsync(BuildByPhotosetQuery(responseBody.Photos.Page));
+                responseBody = await HandleRequestAsync(responseBody, response);
+
+            } while (responseBody.Photos.Page < responseBody.Photos.Pages);
+            return new OkResult();
+        }
+
+        private async Task<FlickrRoot> HandleRequestAsync(FlickrRoot responseBody, HttpResponseMessage response)
+        {
+            responseBody = JsonConvert.DeserializeObject<FlickrRoot>(await response.Content.ReadAsStringAsync());
+            var newPhotos = new List<string>();
+            foreach (var photo in responseBody.Photos.Photo)
+            {
+                if (await _context.FlickrPhotos.FindAsync(photo.Id) == null)
                 {
                     newPhotos.Add(CreatePhotoUrl(photo));
                     await _context.AddAsync(photo);
@@ -55,15 +78,29 @@ namespace PerformersGallery.Services
             }
             await _faceService.AnalyzePhotos(newPhotos);
             await _context.SaveChangesAsync();
-            return new OkResult();
+            return responseBody;
         }
 
-        private string BuildByTagQuery()
+        private string BuildByTagQuery(int page)
         {
             var query = new Dictionary<string, string>();
             query.Add("method", "flickr.photos.search");
             query.Add("api_key", _secrets.FlickrKey);
-            query.Add("text", "int20h"); //TODO: change on tag when it will work
+            query.Add("text", "int20h");
+            query.Add("page", (page + 1).ToString());
+            query.Add("format", "json");
+            query.Add("nojsoncallback", "1");
+            return RequestsHelper.BuildQuery(_flickrUrl, query);
+        }
+
+        private string BuildByPhotosetQuery(int page)
+        {
+            var query = new Dictionary<string, string>();
+            query.Add("method", "flickr.photosets.getPhotos");
+            query.Add("api_key", _secrets.FlickrKey);
+            query.Add("photoset_id", "72157674388093532");
+            query.Add("user_id", "144522605@N06");
+            query.Add("page", (page + 1).ToString());
             query.Add("format", "json");
             query.Add("nojsoncallback", "1");
             return RequestsHelper.BuildQuery(_flickrUrl, query);
