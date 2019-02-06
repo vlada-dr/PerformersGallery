@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PerformersGallery.Hubs;
 using PerformersGallery.Models;
 using PerformersGallery.Services;
 using Swashbuckle.AspNetCore.Swagger;
@@ -31,7 +30,6 @@ namespace PerformersGallery
             services.AddCors();
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddSignalR();
             services.AddSingleton(new SecretsService()
             {
                 FacePlusPlusKey = Configuration.GetSection("Profile:FacePlusPlusKey").Value,
@@ -58,8 +56,6 @@ namespace PerformersGallery
                 });
             });
             services.AddMemoryCache();
-            var provider = services.BuildServiceProvider();
-            services.AddSingleton(new CheckUpdatesService(provider.GetService<FlickrService>()));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -75,16 +71,12 @@ namespace PerformersGallery
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+               // app.UseDeveloperExceptionPage();
             }
             else
             {
                 app.UseHsts();
             }
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<GalleryHub>("/galleryHub");
-            });
             app.UseHttpsRedirection();
             app.UseMvc();
         }

@@ -37,6 +37,7 @@ namespace PerformersGallery.Services
         public async Task<IActionResult> RefreshPhotos()
         {
             await ByTag();
+            await ByPhotoset();
             return new OkResult();
         }
 
@@ -46,7 +47,8 @@ namespace PerformersGallery.Services
             do
             {
                 var response = await _http.GetAsync(BuildByTagQuery(responseBody.Photos.Page));
-                responseBody = await HandleRequestAsync(responseBody, response);
+                responseBody = JsonConvert.DeserializeObject<FlickrRoot>(await response.Content.ReadAsStringAsync());
+                await HandleRequestAsync(responseBody, response);
             } while (responseBody.Photos.Page < responseBody.Photos.Pages);
             
             return new OkResult();
@@ -54,19 +56,19 @@ namespace PerformersGallery.Services
 
         private async Task<IActionResult> ByPhotoset()
         {
-            var responseBody = new FlickrRoot();
+            var responseBody = new FlickrPhotosetsRoot();
             do
             {
-                var response = await _http.GetAsync(BuildByPhotosetQuery(responseBody.Photos.Page));
-                responseBody = await HandleRequestAsync(responseBody, response);
+                var response = await _http.GetAsync(BuildByPhotosetQuery(responseBody.Photoset.Page));
+                responseBody = JsonConvert.DeserializeObject<FlickrPhotosetsRoot>(await response.Content.ReadAsStringAsync());
+                await HandleRequestAsync(responseBody, response);
 
-            } while (responseBody.Photos.Page < responseBody.Photos.Pages);
+            } while (responseBody.Photoset.Page < responseBody.Photoset.Pages);
             return new OkResult();
         }
 
-        private async Task<FlickrRoot> HandleRequestAsync(FlickrRoot responseBody, HttpResponseMessage response)
+        private async Task HandleRequestAsync(FlickrRoot responseBody, HttpResponseMessage response)
         {
-            responseBody = JsonConvert.DeserializeObject<FlickrRoot>(await response.Content.ReadAsStringAsync());
             var newPhotos = new List<string>();
             foreach (var photo in responseBody.Photos.Photo)
             {
@@ -78,7 +80,21 @@ namespace PerformersGallery.Services
             }
             await _faceService.AnalyzePhotos(newPhotos);
             await _context.SaveChangesAsync();
-            return responseBody;
+        }
+
+        private async Task HandleRequestAsync(FlickrPhotosetsRoot responseBody, HttpResponseMessage response)
+        {
+            var newPhotos = new List<string>();
+            foreach (var photo in responseBody.Photoset.Photo)
+            {
+                if (await _context.FlickrPhotos.FindAsync(photo.Id) == null)
+                {
+                    newPhotos.Add(CreatePhotoUrl(photo));
+                    await _context.AddAsync(photo);
+                }
+            }
+            await _faceService.AnalyzePhotos(newPhotos);
+            await _context.SaveChangesAsync();
         }
 
         private string BuildByTagQuery(int page)

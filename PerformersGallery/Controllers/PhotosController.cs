@@ -24,6 +24,7 @@ namespace PerformersGallery.Controllers
         [HttpGet]
         public async Task<GalleryRoot> GetGallery([FromQuery] GalleryViewRoot galleryRoot)
         {
+            await _flickrService.RefreshPhotos();
             return await _galleryService.GetPhotos(galleryRoot);
         }
 
