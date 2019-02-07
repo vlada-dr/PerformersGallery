@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PerformersGallery.Services
+﻿namespace PerformersGallery.Services
 {
     public class SecretsService
     {
@@ -11,5 +6,6 @@ namespace PerformersGallery.Services
         public string FlickrSecret { get; set; }
         public string FacePlusPlusKey { get; set; }
         public string FacePlusPlusSecret { get; set; }
+        public  string JSONAdditional { get; set; }
     }
 }

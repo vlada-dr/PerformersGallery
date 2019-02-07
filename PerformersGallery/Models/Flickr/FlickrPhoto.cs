@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PerformersGallery.Models.Flickr
+﻿namespace PerformersGallery.Models.Flickr
 {
     public class FlickrPhoto
     {
@@ -13,8 +8,6 @@ namespace PerformersGallery.Models.Flickr
         public string Server { get; set; }
         public int Farm { get; set; }
         public string Title { get; set; }
-        public int IsPublic { get; set; }
-        public int IsFriend { get; set; }
-        public int IsFamily { get; set; }
+
     }
 }

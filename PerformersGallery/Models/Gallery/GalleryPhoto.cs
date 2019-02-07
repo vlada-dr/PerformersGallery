@@ -1,8 +1,6 @@
-﻿using PerformersGallery.Models.FacePlusPlus;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PerformersGallery.Models.FacePlusPlus;
 
 namespace PerformersGallery.Models.Gallery
 {
@@ -10,7 +8,7 @@ namespace PerformersGallery.Models.Gallery
     {
         public int Id { get; set; }
         public string PhotoUrl { get; set; }
-        public List<FaceFound> FacesFound { get; set; }
+        public List<Attributes> FacesFound { get; set; }
         public DateTime TimeCreated { get; set; }
     }
 }

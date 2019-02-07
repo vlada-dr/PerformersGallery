@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Net.Http;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -8,17 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 using PerformersGallery.Models;
 using PerformersGallery.Services;
 using Swashbuckle.AspNetCore.Swagger;
-using System;
-using System.Net.Http;
 
 namespace PerformersGallery
 {
     public class Startup
     {
-
         public Startup(IConfiguration configuration)
         {
-            
             Configuration = configuration;
         }
 
@@ -30,7 +27,7 @@ namespace PerformersGallery
             services.AddCors();
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddSingleton(new SecretsService()
+            services.AddSingleton(new SecretsService
             {
                 FacePlusPlusKey = Configuration.GetSection("Profile:FacePlusPlusKey").Value,
                 FacePlusPlusSecret = Configuration.GetSection("Profile:FacePlusPlusSecret").Value,
@@ -41,11 +38,12 @@ namespace PerformersGallery
             services.AddTransient<FaceService>();
             services.AddTransient<GalleryService>();
             services.AddSingleton<HttpClient>();
-        
-            
+
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info {
+                c.SwaggerDoc("v1", new Info
+                {
                     Title = "PerformersGallery API for INT20H by Performers Team",
                     Version = "v1",
                     Description = "API developed by Shcherbakova Anastasiia, front end developed by Doroshenko Vlada",
@@ -71,12 +69,13 @@ namespace PerformersGallery
 
             if (env.IsDevelopment())
             {
-               // app.UseDeveloperExceptionPage();
+                // app.UseDeveloperExceptionPage();
             }
             else
             {
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseMvc();
         }
