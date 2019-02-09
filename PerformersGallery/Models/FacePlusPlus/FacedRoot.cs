@@ -5,7 +5,8 @@ namespace PerformersGallery.Models.FacePlusPlus
 {
     public class FacedRoot
     {
-        [Key] public string ImageId { get; set; }
+        [Key]
+        public string ImageId { get; set; }
 
         public string RequestId { get; set; }
         public long TimeUsed { get; set; }

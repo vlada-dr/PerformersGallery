@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using PerformersGallery.Helpers;
 using PerformersGallery.Models.Gallery;
 using PerformersGallery.Services;
 
@@ -9,6 +11,7 @@ namespace PerformersGallery.Controllers
     [ApiController]
     public class PhotosController : ControllerBase
     {
+        private static DateTime LastUpdate { get; set; }
         private readonly FlickrService _flickrService;
         private readonly GalleryService _galleryService;
 
@@ -21,14 +24,13 @@ namespace PerformersGallery.Controllers
         [HttpGet]
         public async Task<GalleryRoot> GetGallery([FromQuery] GalleryViewRoot galleryRoot)
         {
-            await _flickrService.RefreshPhotos();
+            if (AdditionalData.LastPhotoUpdate < DateTime.Now.AddMinutes(-5) 
+                && galleryRoot.LastPhotoId == 0) {
+                AdditionalData.LastPhotoUpdate = DateTime.Now;
+                await _flickrService.RefreshPhotos();
+            }
             return await _galleryService.GetPhotos(galleryRoot);
         }
 
-        [HttpGet("RefreshData")]
-        public async Task<IActionResult> RefreshData()
-        {
-            return await _flickrService.RefreshPhotos();
-        }
     }
 }

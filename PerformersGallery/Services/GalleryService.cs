@@ -60,26 +60,29 @@ namespace PerformersGallery.Services
         private List<Attributes> FindEmotions(IEnumerable<FaceFound> faces)
         {
             var result = new List<Attributes>();
-            foreach (var face in faces)
+            if(faces != null)
             {
-                double max = 0;
-                var emotion = "";
-                if (face.Attributes?.Emotion != null)
+                foreach (var face in faces)
                 {
-                    foreach (var propertyInfo in face.Attributes.Emotion.GetType().GetProperties())
-                        if (propertyInfo.Name != "Id")
-                        {
-                            var value = (double) propertyInfo.GetValue(face.Attributes.Emotion);
-                            if (value >= max)
+                    double max = 0;
+                    var emotion = "";
+                    if (face.Attributes?.Emotion != null)
+                    {
+                        foreach (var propertyInfo in face.Attributes.Emotion.GetType().GetProperties())
+                            if (propertyInfo.Name != "Id")
                             {
-                                max = value;
-                                emotion = propertyInfo.Name;
+                                var value = (double)propertyInfo.GetValue(face.Attributes.Emotion);
+                                if (value >= max)
+                                {
+                                    max = value;
+                                    emotion = propertyInfo.Name;
+                                }
                             }
-                        }
 
-                    face.Attributes.CastEmotion = emotion;
+                        face.Attributes.CastEmotion = emotion;
+                    }
+                    if(face.Attributes!=null) result.Add(face.Attributes);
                 }
-                result.Add(face.Attributes);
             }
 
             return result;

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PerformersGallery.Helpers;
 using PerformersGallery.Models;
 using PerformersGallery.Services;
 using Swashbuckle.AspNetCore.Swagger;
@@ -14,16 +15,21 @@ namespace PerformersGallery
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            Environment = env;
         }
 
         public IConfiguration Configuration { get; }
+        public IHostingEnvironment Environment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<GalleryContext>(opt => opt.UseInMemoryDatabase("GalleryDB"));
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<GalleryContext>(options =>
+                options.UseSqlServer(connection));
+            services.AddMvc();
             services.AddCors();
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -38,18 +44,18 @@ namespace PerformersGallery
             services.AddTransient<FaceService>();
             services.AddTransient<GalleryService>();
             services.AddSingleton<HttpClient>();
-
+            AdditionalData.Initialize(Environment.ContentRootPath);
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info
                 {
-                    Title = "PerformersGallery API for INT20H by Performers Team",
-                    Version = "v1",
-                    Description = "API developed by Shcherbakova Anastasiia, front end developed by Doroshenko Vlada",
+                    Title = AdditionalData.Info.Swagger.Title.Value,
+                    Version = AdditionalData.Info.Swagger.Version.Value,
+                    Description = AdditionalData.Info.Swagger.Description.Value,
                     Contact = new Contact
                     {
-                        Name = "Shcherbakova Anastasiia, Doroshenko Vlada"
+                        Name = AdditionalData.Info.Swagger.Name.Value
                     }
                 });
             });
@@ -63,7 +69,9 @@ namespace PerformersGallery
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Performers");
+                c.SwaggerEndpoint(
+                    AdditionalData.Info.Swagger.EndpointUrl.Value as string,
+                     AdditionalData.Info.Swagger.EndpointName.Value as string);
                 c.RoutePrefix = string.Empty;
             });
 

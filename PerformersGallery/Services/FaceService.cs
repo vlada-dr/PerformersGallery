@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using PerformersGallery.Helpers;
 using PerformersGallery.Models;
 using PerformersGallery.Models.FacePlusPlus;
 
@@ -11,7 +12,7 @@ namespace PerformersGallery.Services
     public class FaceService
     {
         private readonly GalleryContext _context;
-        private readonly string _faceUrl = "https://api-us.faceplusplus.com/facepp/v3/detect";
+        private readonly string _faceUrl = AdditionalData.Info.Face.Url.Value;
         private readonly GalleryService _galleryService;
         private readonly HttpClient _http;
         private readonly SecretsService _secrets;
@@ -48,7 +49,7 @@ namespace PerformersGallery.Services
                 {"api_key", _secrets.FacePlusPlusKey},
                 {"api_secret", _secrets.FacePlusPlusSecret},
                 {"image_url", url},
-                {"return_attributes", "age,emotion"}
+                {"return_attributes", "emotion,age"}
             };
             return new FormUrlEncodedContent(body);
         }

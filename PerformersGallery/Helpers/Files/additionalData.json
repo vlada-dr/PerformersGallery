@@ -1,3 +1,23 @@
 {
+  "Swagger": {
+    "Title": "PerformersGallery API for INT20H by Performers Team",
+    "Description": "API developed by Shcherbakova Anastasiia, front end developed by Doroshenko Vlada",
+    "Name": "API developed by Shcherbakova Anastasiia, front end developed by Doroshenko Vlada",
+    "Version": "v1",
+    "EndpointUrl": "/swagger/v1/swagger.json",
+    "EndpointName": "API Performers"
+  },
+  "Flickr": {
+    "Url": "https://api.flickr.com/services/rest/",
+    "MethodSearch": "flickr.photos.search",
+    "Tag": "int20h",
+    "MethodPhotosets": "flickr.photosets.getPhotos",
+    "Photoset": "72157674388093532",
+    "User": "144522605@N06"
+  },
+  "Face": {
+    "Url": "https://api-us.faceplusplus.com/facepp/v3/detect"
+  }
+
 
 }

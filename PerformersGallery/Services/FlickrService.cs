@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using PerformersGallery.Helpers;
 using PerformersGallery.Models;
@@ -13,18 +15,20 @@ namespace PerformersGallery.Services
     {
         private readonly GalleryContext _context;
         private readonly FaceService _faceService;
-        private readonly string _flickrUrl = "https://api.flickr.com/services/rest/";
+        private readonly string _flickrUrl = AdditionalData.Info.Flickr.Url.Value;
         private readonly HttpClient _http;
         private readonly SecretsService _secrets;
+        private readonly IMemoryCache _memoryCache;
 
         public FlickrService(SecretsService secrets,
-            GalleryContext context, HttpClient http, FaceService faceService
+            GalleryContext context, HttpClient http, FaceService faceService, IMemoryCache memoryCache
         )
         {
             _secrets = secrets;
             _context = context;
             _http = http;
             _faceService = faceService;
+            _memoryCache = memoryCache;
         }
 
         public async Task<IActionResult> RefreshPhotos()
@@ -64,8 +68,9 @@ namespace PerformersGallery.Services
         private async Task HandleRequestAsync(FlickrRoot responseBody, HttpResponseMessage response)
         {
             var newPhotos = new List<string>();
+            var dbPhotos = await GetPhotosFromCache();
             foreach (var photo in responseBody.Photos.Photo)
-                if (await _context.FlickrPhotos.FindAsync(photo.Id) == null)
+                if (dbPhotos.Find(el => el.Id == photo.Id) == null)
                 {
                     newPhotos.Add(CreatePhotoUrl(photo));
                     await _context.AddAsync(photo);
@@ -73,13 +78,15 @@ namespace PerformersGallery.Services
 
             await _faceService.AnalyzePhotos(newPhotos);
             await _context.SaveChangesAsync();
+            _memoryCache.Remove("FlickrPhotos");
         }
 
         private async Task HandleRequestAsync(FlickrPhotosetsRoot responseBody, HttpResponseMessage response)
         {
             var newPhotos = new List<string>();
+            var dbPhotos = await GetPhotosFromCache();
             foreach (var photo in responseBody.Photoset.Photo)
-                if (await _context.FlickrPhotos.FindAsync(photo.Id) == null)
+                if (dbPhotos.Find(el => el.Id == photo.Id) == null)
                 {
                     newPhotos.Add(CreatePhotoUrl(photo));
                     await _context.AddAsync(photo);
@@ -87,15 +94,16 @@ namespace PerformersGallery.Services
 
             await _faceService.AnalyzePhotos(newPhotos);
             await _context.SaveChangesAsync();
+            _memoryCache.Remove("FlickrPhotos");
         }
 
         private string BuildByTagQuery(int page)
         {
             var query = new Dictionary<string, string>
             {
-                {"method", "flickr.photos.search"},
+                {"method", AdditionalData.Info.Flickr.MethodSearch.Value},
                 {"api_key", _secrets.FlickrKey},
-                {"text", "int20h"},
+                {"text", AdditionalData.Info.Flickr.Tag.Value},
                 {"page", (page + 1).ToString()},
                 {"format", "json"},
                 {"nojsoncallback", "1"}
@@ -107,10 +115,10 @@ namespace PerformersGallery.Services
         {
             var query = new Dictionary<string, string>
             {
-                {"method", "flickr.photosets.getPhotos"},
+                {"method", AdditionalData.Info.Flickr.MethodPhotosets.Value},
                 {"api_key", _secrets.FlickrKey},
-                {"photoset_id", "72157674388093532"},
-                {"user_id", "144522605@N06"},
+                {"photoset_id", AdditionalData.Info.Flickr.Photoset.Value},
+                {"user_id", AdditionalData.Info.Flickr.User.Value},
                 {"page", (page + 1).ToString()},
                 {"format", "json"},
                 {"nojsoncallback", "1"}
@@ -122,6 +130,17 @@ namespace PerformersGallery.Services
         {
             var photoUrl = $"https://farm{photo.Farm}.staticflickr.com/{photo.Server}/{photo.Id}_{photo.Secret}.jpg";
             return photoUrl;
+        }
+
+        private async Task<List<FlickrPhoto>> GetPhotosFromCache()
+        {
+            return await _memoryCache.GetOrCreateAsync("FlickrPhotos", el => GetPhotosFromContext());
+        }
+
+        private async Task<List<FlickrPhoto>> GetPhotosFromContext()
+        {
+            return await _context.FlickrPhotos
+                .ToListAsync();
         }
     }
 }
