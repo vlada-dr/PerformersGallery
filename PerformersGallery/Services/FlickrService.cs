@@ -33,8 +33,8 @@ namespace PerformersGallery.Services
 
         public async Task<IActionResult> RefreshPhotos()
         {
-            await ByTag();
             await ByPhotoset();
+            await ByTag();
             return new OkResult();
         }
 
@@ -103,6 +103,7 @@ namespace PerformersGallery.Services
             {
                 {"method", AdditionalData.Info.Flickr.MethodSearch.Value},
                 {"api_key", _secrets.FlickrKey},
+                {"sort", "date-posted-asc" },
                 {"text", AdditionalData.Info.Flickr.Tag.Value},
                 {"page", (page + 1).ToString()},
                 {"format", "json"},
