@@ -5,7 +5,7 @@ Flicker API and Face++ API (for filtering by emotions) was used.
 ## How to start the project
 You need to have dotnet environment and [.NET Core 2.2 SDK (click here to download 2.2 version)](https://dotnet.microsoft.com/download/dotnet-core/2.2).
 - ### To run from Visual Studio
-Click on the IIS Express button (button locates in the same place where you run your other projects in VS, in the top toolbar).
+Click on the IIS Express button (button located in the same place where you run your other projects in VS, in the top toolbar).
 - ### To run from command line
 Navigate to the project folder and run 
 ```sh
@@ -21,7 +21,7 @@ you have http (5000) and https (5001), NAVIGATE TO HTTPS PORT)
 
 ## Database
 You haven't got access to the Azure db because of Azure firewall, so you will need to create your own DB using migrations. 
-(if you don't want to create db - write to  me and I will add your IP-address in Azure).
+(if you don't want to create db - write to  me and I will add your IP-address in Azure). Also you can use in-memory database following instructions in Startup.cs `ConfigureServices` method.
 ### To create your own DB
 You need to have SQL Server. Go to the appsettings.json and follow instructions what line you need to comment and uncomment.
 Please, look at the connection to your server and change if you need to.
