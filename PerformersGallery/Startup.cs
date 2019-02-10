@@ -26,9 +26,12 @@ namespace PerformersGallery
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // comment this 2 lines for using in-memory db
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<GalleryContext>(options =>
                 options.UseSqlServer(connection));
+            // uncomment this line for using in-memory db
+            // services.AddDbContext<GalleryContext>(opt => opt.UseInMemoryDatabase("GalleryDB"));
             services.AddMvc();
             services.AddCors();
             services.AddAutoMapper();
