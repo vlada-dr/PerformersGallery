@@ -21,7 +21,7 @@ you have http (5000) and https (5001), NAVIGATE TO HTTPS PORT)
 
 ## Database
 You haven't got access to the Azure db because of Azure firewall, so you will need to create your own DB using migrations. 
-(if you don't want to create db - write to  me and I will add your IP-adress in Azure).
+(if you don't want to create db - write to  me and I will add your IP-address in Azure).
 ### To create your own DB
 You need to have SQL Server. Go to the appsettings.json and follow instructions what line you need to comment and uncomment.
 Please, look at the connection to your server and change if you need to.
